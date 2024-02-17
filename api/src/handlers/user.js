@@ -2,23 +2,36 @@ const prisma = require('../db');
 const { hashPassword, createJWT } = require('../utils/auth');
 
 const signUp = async (req, res) => {
-	// select with the same username
-	const existingUser = await prisma.user.findUnique({
-		where: {
-			username: req.body.username,
-		},
-	});
-	console.log(existingUser);
-	const user = await prisma.user.create({
-		data: {
-			username: req.body.username,
-			password: await hashPassword(req.body.password),
-		},
-	});
+  try {
+    // Check if the username already exists
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        username: req.body.username,
+      },
+    });
 
-	const token = createJWT(user);
-	console.log('token', token);
-	res.json({ token });
+    if (existingUser) {
+      // If the username already exists, return an error response
+      return res.status(409).json({ error: 'Username already exists' });
+    }
+
+    // If the username is not found, create a new user
+    const user = await prisma.user.create({
+      data: {
+        username: req.body.username,
+        password: await hashPassword(req.body.password),
+      },
+    });
+
+    // Generate JWT for the new user
+    const token = createJWT(user);
+
+    // Send the token in the response
+    res.json({ token });
+  } catch (error) {
+    // Handle any unexpected errors
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 const signIn = async (req, res) => {
