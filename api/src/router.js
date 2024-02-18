@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const prisma = require('./db');
+const jwt = require('jsonwebtoken');
 const { getUserFromToken, extractToken } = require('./utils/auth');
 
 const router = Router();
@@ -102,10 +103,11 @@ router.delete('/users/:id', async (req, res) => {
 // GET all tweets on the home page
 router.get('/tweets', async (req, res) => {
 	const token = extractToken(req);
-	const user = jwt.verify(token, process.env.JWT_SECRET);
+	const user = getUserFromToken(token);
+	console.log('user after token', user);
 	try {
 		const follower_id = user.id;
-		const follows = prisma.follows.findMany({
+		const follows = await prisma.follows.findMany({
 			where: { follower_id },
 			select: {
 				following_id: true,
@@ -113,7 +115,7 @@ router.get('/tweets', async (req, res) => {
 		});
 		const follows_ids = [follower_id, ...follows.map((x) => x.following_id)];
 
-		const tweets = prisma.tweet.findMany({
+		const tweets = await prisma.tweet.findMany({
 			where: { user_id: { in: follows_ids } },
 			select: {
 				id: true,
@@ -163,21 +165,22 @@ router.get('/tweets/:id', async (req, res) => {
 
 // CREATE a new tweet
 router.post('/tweets', async (req, res) => {
-	const newTweetData = req.body;
+	const body = req.body.body;
+	const token = extractToken(req);
+	const user = getUserFromToken(token);
 
-	try {
-		const createdTweet = await prisma.tweet.create({
-			data: newTweetData,
-			include: {
-				user: true,
+	const tweet = await prisma.tweet.create({
+		data: {
+			body,
+			user: {
+				connect: {
+					id: user.id,
+				},
 			},
-		});
+		},
+	});
 
-		res.json(createdTweet);
-	} catch (error) {
-		console.error('Error creating tweet:', error);
-		res.status(500).send('Internal Server Error');
-	}
+	res.json(tweet);
 });
 
 // UPDATE a tweet by ID

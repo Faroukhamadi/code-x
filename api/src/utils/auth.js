@@ -33,7 +33,7 @@ const extractToken = (req) => {
 
 const protect = (req, res, next) => {
 	const bearer = req.headers.authorization;
-
+	console.log('bearer', bearer);
 	if (!bearer) {
 		res.status(401);
 		res.json({ message: 'Unauthorized' });
@@ -42,8 +42,9 @@ const protect = (req, res, next) => {
 
 	const [, token] = bearer.split(' ');
 	if (!token) {
+		console.log('no token');
 		res.status(401);
-		res.json({ message: 'invalid token' });
+		res.json({ message: 'Unauthorized' });
 		return;
 	}
 
@@ -52,8 +53,9 @@ const protect = (req, res, next) => {
 		req.user = user;
 		next();
 	} catch (error) {
+		console.log('error', error);
 		res.status(401);
-		res.json({ message: 'invalid token' });
+		res.json({ message: 'Unauthorized' });
 	}
 };
 

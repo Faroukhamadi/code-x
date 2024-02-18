@@ -1,37 +1,37 @@
 const prisma = require('../db');
-const { hashPassword, createJWT } = require('../utils/auth');
+const { hashPassword, createJWT, comparePassword } = require('../utils/auth');
 
 const signUp = async (req, res) => {
-  try {
-    // Check if the username already exists
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        username: req.body.username,
-      },
-    });
+	try {
+		// Check if the username already exists
+		const existingUser = await prisma.user.findUnique({
+			where: {
+				username: req.body.username,
+			},
+		});
 
-    if (existingUser) {
-      // If the username already exists, return an error response
-      return res.status(409).json({ error: 'Username already exists' });
-    }
+		if (existingUser) {
+			// If the username already exists, return an error response
+			return res.status(409).json({ error: 'Username already exists' });
+		}
 
-    // If the username is not found, create a new user
-    const user = await prisma.user.create({
-      data: {
-        username: req.body.username,
-        password: await hashPassword(req.body.password),
-      },
-    });
+		// If the username is not found, create a new user
+		const user = await prisma.user.create({
+			data: {
+				username: req.body.username,
+				password: await hashPassword(req.body.password),
+			},
+		});
 
-    // Generate JWT for the new user
-    const token = createJWT(user);
+		// Generate JWT for the new user
+		const token = createJWT(user);
 
-    // Send the token in the response
-    res.json({ token });
-  } catch (error) {
-    // Handle any unexpected errors
-    res.status(500).json({ error: 'Internal server error' });
-  }
+		// Send the token in the response
+		res.json({ token });
+	} catch (error) {
+		// Handle any unexpected errors
+		res.status(500).json({ error: 'Internal server error' });
+	}
 };
 
 const signIn = async (req, res) => {
@@ -40,6 +40,8 @@ const signIn = async (req, res) => {
 			username: req.body.username,
 		},
 	});
+
+	console.log('user inside signIn', user);
 
 	if (!user) {
 		res.status(401);
