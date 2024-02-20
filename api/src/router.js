@@ -5,15 +5,6 @@ const { getUserFromToken, extractToken } = require('./utils/auth');
 
 const router = Router();
 
-// tasks
-router.get('/tasks', (req, res) => {
-	res.json({ greeting: req.greeting });
-});
-router.get('/tasks/:id', () => {});
-router.put('/tasks/:id', () => {});
-router.post('/tasks', () => {});
-router.delete('/tasks/:id', () => {});
-
 router.get('/users', async (req, res) => {
 	try {
 		const users = await prisma.user.findMany();
