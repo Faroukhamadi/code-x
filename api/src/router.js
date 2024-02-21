@@ -95,7 +95,6 @@ router.delete('/users/:id', async (req, res) => {
 router.get('/tweets', async (req, res) => {
 	const token = extractToken(req);
 	const user = getUserFromToken(token);
-	console.log('user after token', user);
 	try {
 		const follower_id = user.id;
 		const follows = await prisma.follows.findMany({
@@ -192,25 +191,61 @@ router.put('/tweets/:id', async (req, res) => {
 
 		res.json(updatedTweet);
 	} catch (error) {
-		console.error(`Error updating tweet with ID ${tweetId}:`, error);
 		res.status(500).send('Internal Server Error');
 	}
 });
 
 // DELETE a tweet by ID
 router.delete('/tweets/:id', async (req, res) => {
+	const token = extractToken(req);
+	const user = getUserFromToken(token);
 	const tweetId = req.params.id;
 
 	try {
 		const deletedTweet = await prisma.tweet.delete({
 			where: {
 				id: tweetId,
+				user_id: user.id,
+			},
+		});
+		res.json(deletedTweet);
+	} catch (error) {
+		if (error.code === 'P2025') {
+			const tweet = await prisma.tweet.findUnique({
+				where: {
+					id: tweetId,
+				},
+			});
+
+			if (tweet) {
+				res.status(403).send('Forbidden');
+			}
+		}
+		res.status(500).send('Internal Server Error');
+	}
+});
+
+// get user profile with tweets
+router.get('/profile/:id', async (req, res) => {
+	const userId = req.params.id;
+	try {
+		const user = await prisma.user.findUnique({
+			where: {
+				id: userId,
+			},
+			include: {
+				tweets: {
+					orderBy: { updated_at: 'desc' },
+				},
 			},
 		});
 
-		res.json(deletedTweet);
+		if (user) {
+			res.json(user);
+		} else {
+			res.status(404).send('User not found');
+		}
 	} catch (error) {
-		console.error(`Error deleting tweet with ID ${tweetId}:`, error);
 		res.status(500).send('Internal Server Error');
 	}
 });
