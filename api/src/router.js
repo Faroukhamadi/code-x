@@ -15,7 +15,6 @@ router.get('/users', async (req, res) => {
 	}
 });
 
-// GET a specific user by ID
 router.get('/users/:id', async (req, res) => {
 	const userId = req.params.id;
 
@@ -37,7 +36,6 @@ router.get('/users/:id', async (req, res) => {
 	}
 });
 
-// UPDATE a user by ID
 router.put('/users/:id', async (req, res) => {
 	const userId = req.params.id;
 	const updatedUserData = req.body;
@@ -57,7 +55,6 @@ router.put('/users/:id', async (req, res) => {
 	}
 });
 
-// CREATE a new user
 router.post('/users', async (req, res) => {
 	const newUser = req.body;
 
@@ -73,7 +70,6 @@ router.post('/users', async (req, res) => {
 	}
 });
 
-// DELETE a user by ID
 router.delete('/users/:id', async (req, res) => {
 	const userId = req.params.id;
 
@@ -91,7 +87,6 @@ router.delete('/users/:id', async (req, res) => {
 	}
 });
 
-// GET all tweets on the home page
 router.get('/tweets', async (req, res) => {
 	const token = extractToken(req);
 	const user = getUserFromToken(token);
@@ -128,7 +123,6 @@ router.get('/tweets', async (req, res) => {
 	}
 });
 
-// GET a specific tweet by ID
 router.get('/tweets/:id', async (req, res) => {
 	const tweetId = req.params.id;
 
@@ -153,7 +147,6 @@ router.get('/tweets/:id', async (req, res) => {
 	}
 });
 
-// CREATE a new tweet
 router.post('/tweets', async (req, res) => {
 	const body = req.body.body;
 	const token = extractToken(req);
@@ -173,7 +166,6 @@ router.post('/tweets', async (req, res) => {
 	res.json(tweet);
 });
 
-// UPDATE a tweet by ID
 router.put('/tweets/:id', async (req, res) => {
 	const tweetId = req.params.id;
 	const updatedTweetData = req.body;
@@ -195,7 +187,6 @@ router.put('/tweets/:id', async (req, res) => {
 	}
 });
 
-// DELETE a tweet by ID
 router.delete('/tweets/:id', async (req, res) => {
 	const token = extractToken(req);
 	const user = getUserFromToken(token);
@@ -225,7 +216,6 @@ router.delete('/tweets/:id', async (req, res) => {
 	}
 });
 
-// get user profile with tweets
 router.get('/profile/:id', async (req, res) => {
 	const userId = req.params.id;
 	try {
