@@ -87,35 +87,49 @@ router.delete('/users/:id', async (req, res) => {
 	}
 });
 
+// router.get('/tweets', async (req, res) => {
+// 	const token = extractToken(req);
+// 	const user = getUserFromToken(token);
+// 	try {
+// 		const follower_id = user.id;
+// 		const follows = await prisma.follows.findMany({
+// 			where: { follower_id },
+// 			select: {
+// 				following_id: true,
+// 			},
+// 		});
+// 		const follows_ids = [follower_id, ...follows.map((x) => x.following_id)];
+
+// 		const tweets = await prisma.tweet.findMany({
+// 			where: { user_id: { in: follows_ids } },
+// 			select: {
+// 				id: true,
+// 				body: true,
+// 				user_id: true,
+// 				user: {
+// 					select: {
+// 						username: true,
+// 						image_url: true,
+// 					},
+// 				},
+// 			},
+// 			orderBy: { updated_at: 'desc' },
+// 		});
+
+// 		res.json(tweets);
+// 	} catch (error) {
+// 		console.error('Error fetching tweets:', error);
+// 		res.status(500).send('Internal Server Error');
+// 	}
+// });
+
 router.get('/tweets', async (req, res) => {
-	const token = extractToken(req);
-	const user = getUserFromToken(token);
 	try {
-		const follower_id = user.id;
-		const follows = await prisma.follows.findMany({
-			where: { follower_id },
-			select: {
-				following_id: true,
-			},
-		});
-		const follows_ids = [follower_id, ...follows.map((x) => x.following_id)];
-
 		const tweets = await prisma.tweet.findMany({
-			where: { user_id: { in: follows_ids } },
-			select: {
-				id: true,
-				body: true,
-				user_id: true,
-				user: {
-					select: {
-						username: true,
-						image_url: true,
-					},
-				},
+			include: {
+				user: true,
 			},
-			orderBy: { updated_at: 'desc' },
 		});
-
 		res.json(tweets);
 	} catch (error) {
 		console.error('Error fetching tweets:', error);
@@ -147,19 +161,31 @@ router.get('/tweets/:id', async (req, res) => {
 	}
 });
 
+// router.post('/tweets', async (req, res) => {
+// 	const content = req.body.content;
+// 	const token = extractToken(req);
+// 	const user = getUserFromToken(token);
+
+// 	const tweet = await prisma.tweet.create({
+// 		data: {
+// 			body: content,
+// 			user: {
+// 				connect: {
+// 					id: user.id,
+// 				},
+// 			},
+// 		},
+// 	});
+
+// 	res.json(tweet);
+// });
+
 router.post('/tweets', async (req, res) => {
-	const body = req.body.body;
-	const token = extractToken(req);
-	const user = getUserFromToken(token);
+	const content = req.body.content;
 
 	const tweet = await prisma.tweet.create({
 		data: {
-			body,
-			user: {
-				connect: {
-					id: user.id,
-				},
-			},
+			body: content,
 		},
 	});
 

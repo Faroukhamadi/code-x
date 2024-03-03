@@ -8,22 +8,22 @@ datasource db {
 }
 
 model User {
-  id        String @id @default(uuid())
-  username  String @unique
-  password  String
-  image_url String @default("")
+  id         String   @id @default(uuid())
+  username   String   @unique
+  password   String
+  image_url  String   @default("")
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  
-  tweets       Tweet[]
-  followed_by  Follows[] @relation("following")
-  following    Follows[] @relation("follower")
+
+  tweets      Tweet[]
+  followed_by Follows[] @relation("following")
+  following   Follows[] @relation("follower")
 }
 
 model Tweet {
   id   String @id @default(uuid())
   body String
-  
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
